@@ -3,144 +3,139 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Memory Visio – 10 joueurs</title>
+<title>Memory – jeu partagé</title>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
-:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#222;background:#f6f7fb}
-*{box-sizing:border-box}body{margin:0;padding:18px}main{max-width:1050px;margin:auto}
-.panel{background:#fff;border:1px solid #ddd;border-radius:18px;padding:18px;margin:14px 0}
-h1,h2,h3{margin-top:0}.muted{color:#666}.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-input,button{font:inherit}input{padding:11px 12px;border:1px solid #ccc;border-radius:11px;min-width:190px}button{padding:11px 15px;border:1px solid #ccc;border-radius:11px;background:#f1f1f1;cursor:pointer}button.primary{background:#e7e7ff;border-color:#aaa}button:disabled{opacity:.45;cursor:not-allowed}
-.status{padding:10px 12px;border-radius:12px;background:#f2f2f2;margin-top:10px}.hidden{display:none!important}
-.players{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.player{padding:9px 12px;border:1px solid #ddd;border-radius:12px;background:#fff}.player.current{outline:3px solid #777}.me{font-weight:700}
-.info{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}.turn{font-size:21px;font-weight:700}
-.board{display:grid;grid-template-columns:repeat(8,1fr);gap:9px}.card{aspect-ratio:1;border:2px solid #ccc;border-radius:14px;background:#fff;font-size:clamp(22px,4vw,38px);font-weight:700;box-shadow:0 2px 5px #0001}.card.open,.card.done{background:#ececff}.card.done{opacity:.65}
-.message{text-align:center;min-height:30px;font-weight:700;padding:8px}.copybox{word-break:break-all;background:#f7f7f7;border:1px dashed #bbb;padding:10px;border-radius:10px}
-ol{padding-left:24px}@media(max-width:650px){body{padding:10px}.board{grid-template-columns:repeat(5,1fr);gap:7px}.card{border-radius:10px}}
+:root{font-family:Arial,Helvetica,sans-serif;color:#17202a;background:#eef2f5}
+*{box-sizing:border-box}
+body{margin:0;padding:16px}
+main{max-width:1100px;margin:auto}
+.panel{background:#fff;border:2px solid #b8c2cc;border-radius:20px;padding:20px;margin:14px 0;box-shadow:0 3px 10px #00000012}
+h1,h2,h3{margin:0 0 10px;color:#18232e}.muted{color:#4d5a66;font-size:1.03rem}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+input,button{font:inherit}
+input{padding:13px 14px;border:2px solid #8f9aa5;border-radius:12px;min-width:210px;color:#17202a;background:#fff}
+input:focus,button:focus{outline:4px solid #f3c65b;outline-offset:2px}
+button{padding:13px 17px;border:2px solid #697783;border-radius:12px;background:#f4f6f8;color:#17202a;cursor:pointer;font-weight:700}
+button.primary{background:#244d6b;color:#fff;border-color:#173b55}
+button.secondary{background:#fff}
+button:disabled{opacity:.45;cursor:not-allowed}
+.status{padding:12px 14px;border-radius:12px;background:#e7edf2;border:1px solid #b9c4cd;margin-top:12px;font-weight:600}
+.hidden{display:none!important}
+.players{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.player{padding:9px 12px;border:2px solid #c0c9d1;border-radius:12px;background:#fff}.player.current{border-color:#244d6b;box-shadow:0 0 0 3px #d8e6ef}.me{font-weight:700}
+.info{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}.turn{font-size:22px;font-weight:800;color:#244d6b}
+.message{text-align:center;min-height:42px;font-weight:800;font-size:1.08rem;padding:10px;display:flex;align-items:center;justify-content:center}
+.copybox{word-break:break-all;background:#f4f6f8;border:2px dashed #8f9aa5;padding:12px;border-radius:10px;margin:10px 0}
+.board{display:grid;grid-template-columns:repeat(8,1fr);gap:10px}
+.card{aspect-ratio:1;border:3px solid #31424f;border-radius:15px;background:#244d6b;box-shadow:0 3px 7px #0003;display:flex;align-items:center;justify-content:center;padding:7px;overflow:hidden}
+.card:hover:not(:disabled){filter:brightness(1.08)}
+.card.open,.card.done{background:#fff;border-color:#1e3545}
+.card.done{opacity:.92}
+.card .back{width:74%;height:74%;border:3px solid #fff;border-radius:12px;position:relative;background:repeating-linear-gradient(45deg,#244d6b 0 10px,#315f80 10px 20px)}
+.card .back:after{content:"";position:absolute;inset:17%;border:3px solid #fff;border-radius:50%;opacity:.95}
+.card svg{width:88%;height:88%;display:block}
+.finish{text-align:center;padding:10px 0 4px}.finish-art{width:110px;height:70px;margin:0 auto 4px;display:block}
+.smallnote{font-size:.95rem;color:#4d5a66}
+@media(max-width:800px){.board{grid-template-columns:repeat(5,1fr);gap:8px}.card{border-radius:12px}}
+@media(max-width:520px){body{padding:9px}.panel{padding:14px}.board{grid-template-columns:repeat(4,1fr);gap:7px}.card{border-width:2px}.card .back{border-width:2px}}
 </style>
 </head>
 <body>
 <main>
 <div class="panel">
-<h1>🧠 Memory – 10 joueurs</h1>
-<p class="muted">Une partie partagée en direct : chacun joue depuis son propre ordinateur ou sa tablette.</p>
+<h1>Memory – jeu partagé</h1>
+<p class="muted">Un jeu de mémoire convivial à plusieurs. Chacun joue depuis son propre ordinateur ou sa tablette.</p>
 <div id="home" class="row">
-  <button id="hostBtn" class="primary">Créer une partie</button>
-  <input id="roomInput" placeholder="Code de la partie">
-  <input id="nameInput" placeholder="Ton prénom">
+  <button id="hostBtn" class="primary">Ouvrir une partie</button>
+  <input id="roomInput" placeholder="Code de la partie" aria-label="Code de la partie">
+  <input id="nameInput" placeholder="Ton prénom" aria-label="Ton prénom">
   <button id="joinBtn">Rejoindre</button>
 </div>
-<div id="status" class="status">Choisis « Créer une partie » si tu es l'animatrice, ou saisis le code reçu.</div>
+<div id="status" class="status">Pour une nouvelle séance, une personne clique sur « Ouvrir une partie ». Le lien peut ensuite être réutilisé.</div>
 </div>
 
 <div id="lobby" class="panel hidden">
-<h2>👥 Salle d'attente</h2>
-<p>Partie : <strong id="roomCode"></strong></p>
+<h2>Salle d'attente</h2>
+<p>Code de la partie : <strong id="roomCode"></strong></p>
 <div class="copybox" id="shareLink"></div>
 <button id="copyBtn">Copier le lien d'invitation</button>
 <div id="lobbyPlayers" class="players"></div>
 <div id="hostControls" class="row hidden">
 <button id="startBtn" class="primary">Lancer la partie</button>
-<button id="resetBtn">Nouvelle partie</button>
+<button id="resetBtn" class="secondary">Nouvelle séance</button>
 </div>
-<p class="muted">L'animatrice doit garder sa page ouverte pendant toute la partie.</p>
+<p class="smallnote">La personne qui ouvre la séance garde simplement sa page ouverte pendant la partie. Elle n'a pas besoin d'être l'animatrice habituelle.</p>
 </div>
 
 <div id="game" class="hidden">
 <div class="panel">
 <div class="info">
 <div><span class="muted">Au tour de</span><div id="turn" class="turn"></div></div>
-<div><div>Coups : <strong id="moves">0</strong></div><div>Paires : <strong id="pairs">0 / 20</strong></div></div>
+<div><div>Coups : <strong id="moves">0</strong></div><div>Paires trouvées : <strong id="pairs">0 / 20</strong></div></div>
 </div>
 <div id="message" class="message" aria-live="polite"></div>
 <div id="players" class="players"></div>
 </div>
-<div id="board" class="board"></div>
-<div id="results" class="panel hidden"><h2>🏆 Résultats</h2><div id="ranking"></div></div>
+<div id="board" class="board" aria-label="Plateau de Memory"></div>
+<div id="finish" class="panel hidden finish">
+  <svg class="finish-art" viewBox="0 0 120 75" aria-hidden="true">
+    <path d="M60 63 C45 51 22 39 22 22 C22 11 34 7 42 14 L60 31 L78 14 C86 7 98 11 98 22 C98 39 75 51 60 63Z" fill="#e7b94e" stroke="#2b3e4a" stroke-width="4"/>
+    <path d="M28 65 Q60 49 92 65" fill="none" stroke="#2b3e4a" stroke-width="4" stroke-linecap="round"/>
+  </svg>
+  <h2>Merci d'avoir joué !</h2>
+  <p class="muted">Bravo à tous pour ce moment partagé.</p>
+  <button id="againBtn" class="primary">Rejouer une partie</button>
+</div>
 </div>
 </main>
 
 <script>
 (() => {
-const SYMBOLS=['🌷','☀️','🍎','🐱','🎵','🌈','🌸','🍀','⭐','🐶','🍓','🌻','🎈','🦋','🍋','🎨','🐼','🍉','🌙','❤️'];
-let peer=null, host=false, hostConn=null, conns=[], myId='', myName='', roomCode='', state=null, pendingFirst=null;
+const ART={
+ flower:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 55v31" stroke="#27495a" stroke-width="7" stroke-linecap="round"/><path d="M50 75c-13-12-27-7-29 3 12 7 22 6 29-3Z" fill="#75a96b" stroke="#27495a" stroke-width="4"/><circle cx="50" cy="42" r="12" fill="#e7b94e" stroke="#27495a" stroke-width="4"/><circle cx="50" cy="21" r="12" fill="#e88a91" stroke="#27495a" stroke-width="4"/><circle cx="70" cy="34" r="12" fill="#e88a91" stroke="#27495a" stroke-width="4"/><circle cx="63" cy="57" r="12" fill="#e88a91" stroke="#27495a" stroke-width="4"/><circle cx="37" cy="57" r="12" fill="#e88a91" stroke="#27495a" stroke-width="4"/><circle cx="30" cy="34" r="12" fill="#e88a91" stroke="#27495a" stroke-width="4"/></svg>`,
+ sun:`<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="22" fill="#e7b94e" stroke="#27495a" stroke-width="5"/><g stroke="#27495a" stroke-width="6" stroke-linecap="round"><path d="M50 12v15M50 73v15M12 50h15M73 50h15M23 23l11 11M66 66l11 11M77 23 66 34M34 66 23 77"/></g><circle cx="42" cy="46" r="3" fill="#27495a"/><circle cx="58" cy="46" r="3" fill="#27495a"/><path d="M42 58q8 7 16 0" fill="none" stroke="#27495a" stroke-width="4" stroke-linecap="round"/></svg>`,
+ apple:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 28c-17-12-36 3-32 28 3 22 16 32 32 26 16 6 29-4 32-26 4-25-15-40-32-28Z" fill="#d95757" stroke="#27495a" stroke-width="5"/><path d="M50 29c-2-12 3-19 12-22" fill="none" stroke="#27495a" stroke-width="5" stroke-linecap="round"/><path d="M58 17c9-8 18-5 20 1-8 6-15 7-20-1Z" fill="#75a96b" stroke="#27495a" stroke-width="4"/></svg>`,
+ cat:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M28 36 24 14l20 12c4-2 8-3 12 0l20-12-4 22c7 9 7 28-2 38-10 11-34 11-44 0-9-10-9-29 2-38Z" fill="#d7a47a" stroke="#27495a" stroke-width="5"/><circle cx="41" cy="53" r="4" fill="#27495a"/><circle cx="59" cy="53" r="4" fill="#27495a"/><path d="M46 64q4 4 8 0M50 64v7" fill="none" stroke="#27495a" stroke-width="4" stroke-linecap="round"/><path d="M25 62H10M27 69H11M75 62h15M73 69h16" stroke="#27495a" stroke-width="3" stroke-linecap="round"/></svg>`,
+ music:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M62 19v48" stroke="#27495a" stroke-width="7"/><path d="M62 19 83 13v42" fill="none" stroke="#27495a" stroke-width="7"/><ellipse cx="45" cy="70" rx="15" ry="10" fill="#7aa6c2" stroke="#27495a" stroke-width="5"/><ellipse cx="66" cy="59" rx="15" ry="10" fill="#e88a91" stroke="#27495a" stroke-width="5"/></svg>`,
+ rainbow:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M12 78a38 38 0 0 1 76 0" fill="none" stroke="#d95757" stroke-width="10"/><path d="M20 78a30 30 0 0 1 60 0" fill="none" stroke="#e7b94e" stroke-width="10"/><path d="M28 78a22 22 0 0 1 44 0" fill="none" stroke="#75a96b" stroke-width="10"/><path d="M36 78a14 14 0 0 1 28 0" fill="none" stroke="#7aa6c2" stroke-width="10"/></svg>`,
+ leaf:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M83 18C48 19 22 34 20 72c29 7 57-10 63-54Z" fill="#75a96b" stroke="#27495a" stroke-width="5"/><path d="M22 76c19-17 34-30 52-45" fill="none" stroke="#27495a" stroke-width="5" stroke-linecap="round"/><path d="M42 58 31 49M55 47l-10-10M68 37l-8-10" stroke="#27495a" stroke-width="4" stroke-linecap="round"/></svg>`,
+ star:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="m50 10 12 27 29 3-22 19 7 29-26-15-26 15 7-29L9 40l29-3Z" fill="#e7b94e" stroke="#27495a" stroke-width="5" stroke-linejoin="round"/></svg>`,
+ dog:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M30 35 17 17l4 33c-3 6-4 15-1 24 5 17 22 21 30 21s25-4 30-21c3-9 2-18-1-24l4-33-13 18c-10-5-29-5-40 0Z" fill="#c98f60" stroke="#27495a" stroke-width="5"/><circle cx="39" cy="58" r="4" fill="#27495a"/><circle cx="61" cy="58" r="4" fill="#27495a"/><path d="M45 70q5 5 10 0" fill="none" stroke="#27495a" stroke-width="4" stroke-linecap="round"/><ellipse cx="50" cy="67" rx="6" ry="4" fill="#27495a"/></svg>`,
+ berry:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 25c-16-12-37 2-34 29 3 28 20 37 34 37s31-9 34-37c3-27-18-41-34-29Z" fill="#d95757" stroke="#27495a" stroke-width="5"/><path d="M50 28 40 14l10 7 10-7-3 14" fill="#75a96b" stroke="#27495a" stroke-width="4" stroke-linejoin="round"/><g fill="#f7df9a"><circle cx="38" cy="45" r="3"/><circle cx="53" cy="41" r="3"/><circle cx="66" cy="48" r="3"/><circle cx="44" cy="59" r="3"/><circle cx="59" cy="63" r="3"/><circle cx="34" cy="68" r="3"/></g></svg>`,
+ sunflower:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 50v40" stroke="#27495a" stroke-width="6"/><g fill="#e7b94e" stroke="#27495a" stroke-width="4"><ellipse cx="50" cy="18" rx="9" ry="17"/><ellipse cx="50" cy="82" rx="9" ry="17"/><ellipse cx="18" cy="50" rx="17" ry="9"/><ellipse cx="82" cy="50" rx="17" ry="9"/><ellipse cx="28" cy="28" rx="10" ry="17" transform="rotate(-45 28 28)"/><ellipse cx="72" cy="28" rx="10" ry="17" transform="rotate(45 72 28)"/><ellipse cx="28" cy="72" rx="10" ry="17" transform="rotate(45 28 72)"/><ellipse cx="72" cy="72" rx="10" ry="17" transform="rotate(-45 72 72)"/></g><circle cx="50" cy="50" r="14" fill="#7a5638" stroke="#27495a" stroke-width="4"/></svg>`,
+ balloon:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 15c-19 0-30 17-27 35 2 15 14 24 27 26 13-2 25-11 27-26 3-18-8-35-27-35Z" fill="#e88a91" stroke="#27495a" stroke-width="5"/><path d="M43 76h14l-7 10Z" fill="#e88a91" stroke="#27495a" stroke-width="4"/><path d="M50 86c-4 6 8 7 0 14" fill="none" stroke="#27495a" stroke-width="4" stroke-linecap="round"/></svg>`,
+ butterfly:`<svg viewBox="0 0 100 100" aria-hidden="true"><ellipse cx="31" cy="37" rx="20" ry="27" fill="#7aa6c2" stroke="#27495a" stroke-width="5" transform="rotate(-25 31 37)"/><ellipse cx="69" cy="37" rx="20" ry="27" fill="#e88a91" stroke="#27495a" stroke-width="5" transform="rotate(25 69 37)"/><ellipse cx="34" cy="69" rx="14" ry="20" fill="#e7b94e" stroke="#27495a" stroke-width="5" transform="rotate(20 34 69)"/><ellipse cx="66" cy="69" rx="14" ry="20" fill="#75a96b" stroke="#27495a" stroke-width="5" transform="rotate(-20 66 69)"/><path d="M50 25v52" stroke="#27495a" stroke-width="6" stroke-linecap="round"/><path d="M45 24q-8-12-14-7M55 24q8-12 14-7" fill="none" stroke="#27495a" stroke-width="4" stroke-linecap="round"/></svg>`,
+ lemon:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M29 63c-11-19 3-42 27-43 24-1 37 22 25 43-10 18-40 18-52 0Z" fill="#e7b94e" stroke="#27495a" stroke-width="5" transform="rotate(-25 52 51)"/><path d="M59 23c5-7 12-9 18-6-4 8-10 11-18 6Z" fill="#75a96b" stroke="#27495a" stroke-width="4"/></svg>`,
+ palette:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 15c-23 0-39 15-39 34 0 17 13 30 29 30h10c5 0 8-5 5-9-4-6 1-11 8-10 15 2 26-6 26-20 0-14-15-25-39-25Z" fill="#d8c0a8" stroke="#27495a" stroke-width="5"/><circle cx="34" cy="38" r="7" fill="#d95757"/><circle cx="50" cy="31" r="7" fill="#e7b94e"/><circle cx="66" cy="39" r="7" fill="#75a96b"/><circle cx="31" cy="55" r="7" fill="#7aa6c2"/></svg>`,
+ panda:`<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="30" cy="25" r="13" fill="#333" stroke="#27495a" stroke-width="4"/><circle cx="70" cy="25" r="13" fill="#333" stroke="#27495a" stroke-width="4"/><circle cx="50" cy="54" r="35" fill="#fff" stroke="#27495a" stroke-width="5"/><ellipse cx="38" cy="51" rx="9" ry="13" fill="#333" transform="rotate(30 38 51)"/><ellipse cx="62" cy="51" rx="9" ry="13" fill="#333" transform="rotate(-30 62 51)"/><circle cx="40" cy="52" r="3" fill="#fff"/><circle cx="60" cy="52" r="3" fill="#fff"/><ellipse cx="50" cy="65" rx="7" ry="5" fill="#333"/></svg>`,
+ watermelon:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M15 35a35 35 0 0 0 70 0H15Z" fill="#75a96b" stroke="#27495a" stroke-width="5"/><path d="M21 35a29 29 0 0 0 58 0H21Z" fill="#e88a91" stroke="#27495a" stroke-width="4"/><g fill="#27495a"><ellipse cx="34" cy="45" rx="3" ry="6"/><ellipse cx="50" cy="51" rx="3" ry="6"/><ellipse cx="66" cy="45" rx="3" ry="6"/></g></svg>`,
+ moon:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M68 13c-19 6-31 23-29 42 2 21 20 34 41 31-8 9-20 13-32 10C25 91 11 73 13 50 15 27 33 10 54 9c5 0 10 1 14 4Z" fill="#e7b94e" stroke="#27495a" stroke-width="5"/></svg>`,
+ heart:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 82C43 76 16 59 16 37c0-13 9-22 21-22 7 0 12 3 17 10 5-7 10-10 17-10 12 0 21 9 21 22 0 22-27 39-42 45Z" fill="#e88a91" stroke="#27495a" stroke-width="5"/></svg>`
+};
+const SYMBOLS=Object.keys(ART);
+let peer=null, host=false, hostConn=null, conns=[], myId='', myName='', roomCode='', state=null;
 const $=id=>document.getElementById(id);
 function setStatus(t){$('status').textContent=t}
 function show(id){$(id).classList.remove('hidden')} function hide(id){$(id).classList.add('hidden')}
 function safe(s){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function code(){return Math.random().toString(36).slice(2,8).toUpperCase()}
-function makeDeck(){return shuffle(SYMBOLS.flatMap((s)=>[{s},{s}]).map((x,i)=>({...x,id:i,open:false,done:false})))}
+function makeDeck(){return shuffle(SYMBOLS.flatMap(s=>[{s},{s}]).map((x,i)=>({...x,id:i,open:false,done:false})))}
 function broadcast(msg){conns.forEach(c=>{if(c&&c.open)c.send(msg)})}
 function currentPlayers(){return state?state.players:[]}
-function renderPlayers(target){
- const list=target||$('players'); list.innerHTML='';
- currentPlayers().forEach((p,i)=>{const d=document.createElement('div');d.className='player '+(i===state.current?'current':'')+(p.id===myId?' me':'');d.innerHTML='<strong>'+safe(p.name)+'</strong><br><span class="muted">'+p.score+' paire'+(p.score!==1?'s':'')+'</span>';list.appendChild(d)})
-}
-function renderLobby(){
- $('roomCode').textContent=roomCode;
- const link=location.origin+location.pathname+'?room='+encodeURIComponent(roomCode);
- $('shareLink').textContent=link;
- const list=$('lobbyPlayers');list.innerHTML='';
- (state?.players||[]).forEach(p=>{const d=document.createElement('div');d.className='player'+(p.id===myId?' me':'');d.textContent=p.name+(p.id===myId?' (moi)':'');list.appendChild(d)});
- if(host)show('hostControls'); else hide('hostControls');
-}
-function renderGame(){
- hide('lobby');show('game');
- $('turn').textContent=state.players[state.current]?.name||'';
- $('moves').textContent=state.moves;$('pairs').textContent=state.found+' / 20';
- renderPlayers();
- $('message').textContent=state.message||'';
- const board=$('board');board.innerHTML='';
- state.deck.forEach((c,i)=>{
-   const b=document.createElement('button');b.className='card '+((c.open||c.done)?'open ':'')+(c.done?'done':'');
-   b.textContent=(c.open||c.done)?c.s:'?';
-   b.disabled=c.done||state.phase!=='playing'||state.current!==state.players.findIndex(p=>p.id===myId)||c.open;
-   b.setAttribute('aria-label',(c.open||c.done)?'Carte révélée':'Carte cachée');
-   b.onclick=()=>choose(i);board.appendChild(b);
- });
- if(state.phase==='finished'){show('results');const sorted=[...state.players].sort((a,b)=>b.score-a.score);$('ranking').innerHTML=sorted.map((p,i)=>`<div style="display:flex;justify-content:space-between;padding:5px 0"><span><strong>${i+1}.</strong> ${safe(p.name)}</span><strong>${p.score} paire${p.score!==1?'s':''}</strong></div>`).join('')}else hide('results');
-}
-function apply(s){state=s; if(state.phase==='lobby')renderLobby(); else renderGame()}
-function hostInit(){
- roomCode=code();host=true;myName=$('nameInput').value.trim()||'Animatrice';myId='host';
- state={phase:'lobby',players:[{id:myId,name:myName,score:0}],current:0,moves:0,found:0,deck:[],message:''};
- peer=new Peer('memory-'+roomCode);
- peer.on('open',()=>{setStatus('Partie créée. Envoie le lien aux participants.');show('lobby');renderLobby()});
- peer.on('connection',c=>{c.on('open',()=>{if(state.players.length>=10){c.send({type:'full',state});c.close();return}const proposed=(c.metadata&&c.metadata.name)||'Participant';const id=c.peer;state.players.push({id,name:proposed.slice(0,24),score:0});conns.push(c);c.send({type:'state',state});broadcast({type:'state',state});renderLobby();c.on('data',m=>handleHostMessage(c,m));c.on('close',()=>{state.players=state.players.filter(p=>p.id!==id);conns=conns.filter(x=>x!==c);broadcast({type:'state',state});renderLobby()})})});
- peer.on('error',e=>setStatus('Erreur de connexion : '+e.message));
-}
-function joinRoom(){
- roomCode=$('roomInput').value.trim().toUpperCase();myName=$('nameInput').value.trim()||'Participant';
- if(!roomCode){setStatus('Entre un code de partie.');return}
- peer=new Peer();
- peer.on('open',()=>{const c=peer.connect('memory-'+roomCode,{metadata:{name:myName}});hostConn=c;c.on('open',()=>{myId=peer.id;setStatus('Connecté à la partie.');show('lobby')});c.on('data',m=>{if(m.type==='state'||m.type==='full'){state=m.state;apply(state)}});c.on('close',()=>setStatus('La connexion avec l’animatrice a été interrompue.'))});
- peer.on('error',e=>setStatus('Impossible de rejoindre cette partie. Vérifie le code.'));
-}
-function handleHostMessage(c,m){
- if(!m||m.type!=='action'||state.phase!=='playing')return;
- const idx=state.players.findIndex(p=>p.id===c.peer);if(idx<0||idx!==state.current)return;
- const i=m.index;if(!Number.isInteger(i)||i<0||i>=state.deck.length)return;
- const card=state.deck[i];if(card.open||card.done)return;
- card.open=true;
- if(state.first==null){state.first=i;state.message=state.players[idx].name+' : choisis une deuxième carte.';broadcast({type:'state',state});renderGame();return}
- const j=state.first;const card2=state.deck[j];state.first=null;state.moves++;
- if(card.s===card2.s){
-   card.done=card2.done=true;state.found++;state.players[idx].score++;
-   state.message='🎉 '+state.players[idx].name+' trouve une paire et rejoue !';
-   if(state.found===20){state.phase='finished';state.message='🎉 Partie terminée ! Bravo à tous !'}
-   broadcast({type:'state',state});renderGame();
- }else{
-   state.message='Pas de paire. Tour suivant…';broadcast({type:'state',state});renderGame();
-   setTimeout(()=>{if(state.phase!=='playing')return;card.open=card2.open=false;state.current=(state.current+1)%state.players.length;state.message='À '+state.players[state.current].name+' !';broadcast({type:'state',state});renderGame()},1100)
- }
-}
-function choose(i){if(host){handleHostMessage({peer:myId},{type:'action',index:i});}else if(hostConn?.open)hostConn.send({type:'action',index:i})}
-$('hostBtn').onclick=hostInit;$('joinBtn').onclick=joinRoom;
-$('copyBtn').onclick=async()=>{try{await navigator.clipboard.writeText($('shareLink').textContent);setStatus('Lien copié.')}catch(e){setStatus('Sélectionne et copie le lien affiché.')}}
-$('startBtn').onclick=()=>{if(!host||state.players.length<2)return;state.phase='playing';state.deck=makeDeck();state.current=0;state.moves=0;state.found=0;state.first=null;state.message='À '+state.players[0].name+' !';broadcast({type:'state',state});renderGame()}
-$('resetBtn').onclick=()=>{if(host){state.phase='lobby';state.deck=[];state.players.forEach(p=>p.score=0);broadcast({type:'state',state});renderLobby()}}
-const params=new URLSearchParams(location.search);if(params.get('room')){$('roomInput').value=params.get('room');setStatus('Le code de la partie a été prérempli. Entre ton prénom puis clique sur Rejoindre.')}
+function renderPlayers(target){const list=target||$('players');list.innerHTML='';currentPlayers().forEach((p,i)=>{const d=document.createElement('div');d.className='player '+(i===state.current?'current':'')+(p.id===myId?' me':'');d.innerHTML='<strong>'+safe(p.name)+'</strong>';list.appendChild(d)})}
+function shareUrl(){return location.origin+location.pathname+'?room='+encodeURIComponent(roomCode)}
+function renderLobby(){$('roomCode').textContent=roomCode;$('shareLink').textContent=shareUrl();const list=$('lobbyPlayers');list.innerHTML='';(state?.players||[]).forEach(p=>{const d=document.createElement('div');d.className='player'+(p.id===myId?' me':'');d.textContent=p.name+(p.id===myId?' (moi)':'');list.appendChild(d)});if(host)show('hostControls');else hide('hostControls')}
+function renderGame(){hide('lobby');show('game');$('turn').textContent=state.players[state.current]?.name||'';$('moves').textContent=state.moves;$('pairs').textContent=state.found+' / 20';renderPlayers();$('message').textContent=state.message||'';const board=$('board');board.innerHTML='';state.deck.forEach((c,i)=>{const b=document.createElement('button');b.className='card '+((c.open||c.done)?'open ':'')+(c.done?'done':'');b.innerHTML=(c.open||c.done)?ART[c.s]:'<span class="back" aria-hidden="true"></span>';b.disabled=c.done||state.phase!=='playing'||state.current!==state.players.findIndex(p=>p.id===myId)||c.open;b.setAttribute('aria-label',(c.open||c.done)?'Carte révélée':'Carte cachée');b.onclick=()=>choose(i);board.appendChild(b)});if(state.phase==='finished'){show('finish');}else hide('finish')}
+function apply(s){state=s;if(state.phase==='lobby')renderLobby();else renderGame()}
+function hostInit(){roomCode=code();host=true;myName=$('nameInput').value.trim()||'Joueur';myId='host';state={phase:'lobby',players:[{id:myId,name:myName,score:0}],current:0,moves:0,found:0,deck:[],message:''};peer=new Peer('memory-'+roomCode);peer.on('open',()=>{setStatus('Partie ouverte. Tu peux maintenant partager le lien.');show('lobby');renderLobby()});peer.on('connection',c=>{c.on('open',()=>{if(state.players.length>=10){c.send({type:'full',state});c.close();return}const proposed=(c.metadata&&c.metadata.name)||'Participant';const id=c.peer;state.players.push({id,name:proposed.slice(0,24),score:0});conns.push(c);c.send({type:'state',state});broadcast({type:'state',state});renderLobby();c.on('data',m=>handleHostMessage(c,m));c.on('close',()=>{state.players=state.players.filter(p=>p.id!==id);conns=conns.filter(x=>x!==c);if(state.players.length===0){state.phase='lobby'}broadcast({type:'state',state});renderLobby()})})});peer.on('error',e=>setStatus('Erreur de connexion : '+e.message))}
+function joinRoom(){roomCode=$('roomInput').value.trim().toUpperCase();myName=$('nameInput').value.trim()||'Joueur';if(!roomCode){setStatus('Entre un code de partie.');return}peer=new Peer();peer.on('open',()=>{const c=peer.connect('memory-'+roomCode,{metadata:{name:myName}});hostConn=c;c.on('open',()=>{myId=peer.id;setStatus('Connecté à la partie.');show('lobby')});c.on('data',m=>{if(m.type==='state'||m.type==='full'){state=m.state;apply(state)}});c.on('close',()=>setStatus('La connexion avec le joueur qui a ouvert la séance a été interrompue.'))});peer.on('error',()=>setStatus('Impossible de rejoindre cette partie. Vérifie le code ou demande à une personne d’ouvrir la séance.'))}
+function handleHostMessage(c,m){if(!m||m.type!=='action'||state.phase!=='playing')return;const idx=state.players.findIndex(p=>p.id===c.peer);if(idx<0||idx!==state.current)return;const i=m.index;if(!Number.isInteger(i)||i<0||i>=state.deck.length)return;const card=state.deck[i];if(card.open||card.done)return;card.open=true;if(state.first==null){state.first=i;state.message=state.players[idx].name+' : choisis une deuxième carte.';broadcast({type:'state',state});renderGame();return}const j=state.first;const card2=state.deck[j];state.first=null;state.moves++;if(card.s===card2.s){card.done=card2.done=true;state.found++;state.message=state.players[idx].name+' a trouvé une paire ! Encore à toi.';if(state.found===20){state.phase='finished';state.message='La partie est terminée !';}broadcast({type:'state',state});renderGame()}else{state.message='Ce ne sont pas les mêmes cartes. Prenez le temps de les regarder…';broadcast({type:'state',state});renderGame();setTimeout(()=>{if(state.phase!=='playing')return;card.open=card2.open=false;state.current=(state.current+1)%state.players.length;state.message='À '+state.players[state.current].name+' !';broadcast({type:'state',state});renderGame()},3000)}}
+function choose(i){if(host)handleHostMessage({peer:myId},{type:'action',index:i});else if(hostConn?.open)hostConn.send({type:'action',index:i})}
+function startNewGame(){if(!host)return;state.phase='playing';state.deck=makeDeck();state.current=(state.current+1)%state.players.length;state.moves=0;state.found=0;state.first=null;state.message='À '+state.players[state.current].name+' !';broadcast({type:'state',state});renderGame()}
+$('hostBtn').onclick=hostInit;$('joinBtn').onclick=joinRoom;$('copyBtn').onclick=async()=>{try{await navigator.clipboard.writeText($('shareLink').textContent);setStatus('Lien copié.')}catch(e){setStatus('Le lien est affiché juste au-dessus : tu peux le sélectionner et le copier.')}};$('startBtn').onclick=()=>{if(!host||state.players.length<2)return;startNewGame()};$('resetBtn').onclick=()=>{if(host){state.phase='lobby';state.deck=[];state.first=null;state.found=0;state.moves=0;state.message='';broadcast({type:'state',state});renderLobby()}};$('againBtn').onclick=()=>{if(host)startNewGame()};
+const params=new URLSearchParams(location.search);if(params.get('room')){$('roomInput').value=params.get('room');setStatus('Cette séance est accessible avec ce lien. Entre ton prénom puis clique sur Rejoindre. Si personne n’a encore ouvert la séance, demande à une personne de cliquer sur « Ouvrir une partie ».')}
 })();
 </script>
 </body>
