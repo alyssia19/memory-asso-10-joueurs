@@ -1,78 +1,72 @@
 <!doctype html>
 <html lang="fr">
-<head><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Memory – jeu partagé</title>
+<title>Memory Visio – 10 joueurs</title>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
-:root{font-family:Arial,Helvetica,sans-serif;color:#173042;background:#f3f0ea}*{box-sizing:border-box}body{margin:0;padding:16px;background:linear-gradient(180deg,#f7f4ee 0%,#edf1f0 100%)}main{max-width:1100px;margin:auto}.panel{background:#fffdf9;border:2px solid #d8d2c7;border-radius:22px;padding:20px;margin:14px 0;box-shadow:0 5px 18px #18304214}h1,h2,h3{margin:0 0 10px;color:#173042}.muted{color:#52616b;font-size:1.03rem}.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}input,button{font:inherit}input{padding:13px 14px;border:2px solid #8f9da5;border-radius:12px;min-width:210px;color:#173042;background:#fff}input:focus,button:focus{outline:4px solid #e0b85f;outline-offset:2px}button{padding:13px 17px;border:2px solid #687a84;border-radius:12px;background:#f6f3ed;color:#173042;cursor:pointer;font-weight:700}button.primary{background:#214d69;color:#fff;border-color:#173b55}button.secondary{background:#fff}button:disabled{opacity:.45;cursor:not-allowed}.card:focus-visible{outline:4px solid #e0b85f;outline-offset:3px}.card:active:not(:disabled){transform:scale(.98)}.status{padding:12px 14px;border-radius:12px;background:#e8eeef;border:1px solid #bdc9cc;margin-top:12px;font-weight:600}.hidden{display:none!important}.players{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.player{padding:9px 12px;border:2px solid #c5cdd0;border-radius:12px;background:#fff}.player.current{border-color:#214d69;box-shadow:0 0 0 3px #dbe7ec}.me{font-weight:700}.info{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}.turn{font-size:22px;font-weight:800;color:#214d69}.message{text-align:center;min-height:42px;font-weight:800;font-size:1.08rem;padding:10px;display:flex;align-items:center;justify-content:center}.copybox{word-break:break-all;background:#f6f3ed;border:2px dashed #8f9da5;padding:12px;border-radius:10px;margin:10px 0}.board{display:grid;grid-template-columns:repeat(8,1fr);gap:12px}.card{aspect-ratio:1;border:3px solid #173b55;border-radius:18px;background:#173f5a;box-shadow:0 5px 12px #17304235;display:flex;align-items:center;justify-content:center;padding:8px;overflow:hidden;transition:transform .15s,box-shadow .15s}.card:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 16px #17304238}.card.open,.card.done{background:#fffaf1;border-color:#173b55}.card.done{opacity:.96}.card .back{width:78%;height:78%;border:2px solid #e9dfcc;border-radius:14px;position:relative;background:#173f5a}.card .back:before{content:"";position:absolute;inset:16%;border:2px solid #90a6ae;border-radius:50%;opacity:.75}.card .back:after{content:"";position:absolute;width:44%;height:44%;left:28%;top:28%;border:2px solid #90a6ae;border-radius:50% 50% 50% 10%;transform:rotate(-35deg);opacity:.75}.articon{width:82%;height:82%;border-radius:22px;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:inset 0 0 0 2px #173b5520}.articon:after{content:"";position:absolute;inset:9%;border:1.5px solid currentColor;border-radius:18px;opacity:.18}.articon i{font-size:clamp(34px,5vw,70px);position:relative;z-index:1}.art-0{background:#e5efe7;color:#426a55}.art-1{background:#f1e5e8;color:#925967}.art-2{background:#e9e1d5;color:#8a5d3f}.art-3{background:#e5edf1;color:#3e6478}.art-4{background:#f3e9d7;color:#9a6b36}.art-5{background:#e5eceb;color:#3f6d70}.finish{text-align:center;padding:10px 0 4px}.finish-art{width:110px;height:70px;margin:0 auto 4px;display:block}.smallnote{font-size:.95rem;color:#52616b}
+:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#222;background:#f6f7fb}
+*{box-sizing:border-box}body{margin:0;padding:18px}main{max-width:1050px;margin:auto}
+.panel{background:#fff;border:1px solid #ddd;border-radius:18px;padding:18px;margin:14px 0}
+h1,h2,h3{margin-top:0}.muted{color:#666}.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+input,button{font:inherit}input{padding:11px 12px;border:1px solid #ccc;border-radius:11px;min-width:190px}button{padding:11px 15px;border:1px solid #ccc;border-radius:11px;background:#f1f1f1;cursor:pointer}button.primary{background:#e7e7ff;border-color:#aaa}button:disabled{opacity:.45;cursor:not-allowed}
+.status{padding:10px 12px;border-radius:12px;background:#f2f2f2;margin-top:10px}.hidden{display:none!important}
+.players{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.player{padding:9px 12px;border:1px solid #ddd;border-radius:12px;background:#fff}.player.current{outline:3px solid #777}.me{font-weight:700}
+.info{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}.turn{font-size:21px;font-weight:700}
+.board{display:grid;grid-template-columns:repeat(8,1fr);gap:9px}.card{aspect-ratio:1;border:2px solid #ccc;border-radius:14px;background:#fff;font-size:clamp(22px,4vw,38px);font-weight:700;box-shadow:0 2px 5px #0001}.card.open,.card.done{background:#ececff}.card.done{opacity:.65}
+.message{text-align:center;min-height:30px;font-weight:700;padding:8px}.copybox{word-break:break-all;background:#f7f7f7;border:1px dashed #bbb;padding:10px;border-radius:10px}
+@media(max-width:650px){body{padding:10px}.board{grid-template-columns:repeat(5,1fr);gap:7px}.card{border-radius:10px}}
 </style>
 </head>
 <body>
 <main>
-<div class="hero">
-  <div class="hero-mark"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></div>
-  <div>
-    <div class="eyebrow">ACTIVITÉ MÉMOIRE · VISIO</div>
-    <h1>Memory – jeu partagé</h1>
-    <p class="muted">Un moment de mémoire, d’attention et de partage, chacun depuis son propre appareil.</p>
-  </div>
-</div>
 <div class="panel">
+<h1>🧠 Memory – 10 joueurs</h1>
+<p class="muted">Une partie partagée en direct : chacun joue depuis son propre ordinateur ou sa tablette.</p>
 <div id="home" class="row">
-  <button id="hostBtn" class="primary">Ouvrir une partie</button>
-  <input id="roomInput" placeholder="Code de la partie" aria-label="Code de la partie">
-  <input id="nameInput" placeholder="Ton prénom" aria-label="Ton prénom">
+  <button id="hostBtn" class="primary">Créer une partie</button>
+  <input id="roomInput" placeholder="Code de la partie">
+  <input id="nameInput" placeholder="Ton prénom">
   <button id="joinBtn">Rejoindre</button>
 </div>
-<div id="status" class="status">Pour une nouvelle séance, une personne clique sur « Ouvrir une partie ». Le lien peut ensuite être réutilisé.</div>
+<div id="status" class="status">Choisis « Créer une partie » si tu es l'animatrice, ou saisis le code reçu.</div>
 </div>
 
 <div id="lobby" class="panel hidden">
-<h2>Salle d'attente</h2>
-<p>Code de la partie : <strong id="roomCode"></strong></p>
+<h2>👥 Salle d'attente</h2>
+<p>Partie : <strong id="roomCode"></strong></p>
 <div class="copybox" id="shareLink"></div>
 <button id="copyBtn">Copier le lien d'invitation</button>
 <div id="lobbyPlayers" class="players"></div>
 <div id="hostControls" class="row hidden">
-<button id="startBtn" class="primary">Lancer la partie</button><span id="startHint" class="smallnote"></span>
-<button id="resetBtn" class="secondary">Nouvelle séance</button>
+<button id="startBtn" class="primary">Lancer la partie</button>
+<button id="resetBtn">Nouvelle partie</button>
 </div>
-<p class="smallnote">Ce lien permet de rejoindre <strong>cette séance</strong>. Pour une nouvelle séance, revenez au lien principal du jeu et cliquez sur « Ouvrir une partie ».</p>
+<p class="muted">L'animatrice doit garder sa page ouverte pendant toute la partie.</p>
 </div>
 
 <div id="game" class="hidden">
-<div class="game-head">
-  <div><div class="eyebrow">PARTIE EN COURS</div><h2>À vous de jouer</h2></div>
-  <div class="game-stat"><i class="fa-solid fa-clone" aria-hidden="true"></i><span><strong id="pairs">0 / 20</strong><small> paires trouvées</small></span></div>
-</div>
 <div class="panel">
 <div class="info">
 <div><span class="muted">Au tour de</span><div id="turn" class="turn"></div></div>
-<div class="moves-stat"><div><span class="muted">Coups</span><strong id="moves">0</strong></div></div>
+<div><div>Coups : <strong id="moves">0</strong></div><div>Paires : <strong id="pairs">0 / 20</strong></div></div>
 </div>
 <div id="message" class="message" aria-live="polite"></div>
 <div id="players" class="players"></div>
 </div>
-<div id="board" class="board" aria-label="Plateau de Memory"></div>
-<div id="finish" class="panel hidden finish">
-  <svg class="finish-art" viewBox="0 0 120 75" aria-hidden="true">
-    <path d="M60 63 C45 51 22 39 22 22 C22 11 34 7 42 14 L60 31 L78 14 C86 7 98 11 98 22 C98 39 75 51 60 63Z" fill="#e7b94e" stroke="#2b3e4a" stroke-width="4"/>
-    <path d="M28 65 Q60 49 92 65" fill="none" stroke="#2b3e4a" stroke-width="4" stroke-linecap="round"/>
-  </svg>
-  <h2>Merci d'avoir joué !</h2>
-  <p class="muted">Bravo à tous pour ce moment partagé.</p>
-  <button id="againBtn" class="primary">Rejouer une partie</button>
+<div id="board" class="board"></div>
+<div id="finish" class="panel hidden" style="text-align:center">
+<h2>🎉 Partie terminée !</h2>
+<p class="muted">Merci à tous d'avoir participé à ce moment partagé 💛</p>
+<button id="againBtn" class="primary">🔄 Revanche / Nouvelle partie</button>
 </div>
 </div>
 </main>
 
 <script>
 (() => {
-const ICONS=[["leaf","fa-leaf"],["flower","fa-spa"],["camera","fa-camera-retro"],["book","fa-book-open"],["coffee","fa-mug-hot"],["bicycle","fa-bicycle"],["compass","fa-compass"],["mountain","fa-mountain-sun"],["boat","fa-sailboat"],["feather","fa-feather-pointed"],["sun","fa-sun"],["moon","fa-moon"],["heart","fa-heart"],["star","fa-star"],["tree","fa-tree"],["apple","fa-apple-whole"],["key","fa-key"],["gem","fa-gem"],["music","fa-music"],["umbrella","fa-umbrella"]];
-const ART=Object.fromEntries(ICONS.map(function(x,i){return [x[0],"<span class=\"articon art-"+(i%6)+"\" aria-hidden=\"true\"><i class=\"fa-solid "+x[1]+"\"></i></span>"];}));
-const SYMBOLS=ICONS.map(function(x){return x[0];});
+const SYMBOLS=['🌷','☀️','🍎','🐱','🎵','🌈','🌸','🍀','⭐','🐶','🍓','🌻','🎈','🦋','🍋','🎨','🐼','🍉','🌙','❤️'];
 let peer=null, host=false, hostConn=null, conns=[], myId='', myName='', roomCode='', state=null;
 const $=id=>document.getElementById(id);
 function setStatus(t){$('status').textContent=t}
@@ -83,18 +77,65 @@ function code(){return Math.random().toString(36).slice(2,8).toUpperCase()}
 function makeDeck(){return shuffle(SYMBOLS.flatMap(s=>[{s},{s}]).map((x,i)=>({...x,id:i,open:false,done:false})))}
 function broadcast(msg){conns.forEach(c=>{if(c&&c.open)c.send(msg)})}
 function currentPlayers(){return state?state.players:[]}
-function renderPlayers(target){const list=target||$('players');list.innerHTML='';currentPlayers().forEach((p,i)=>{const d=document.createElement('div');d.className='player '+(i===state.current?'current':'')+(p.id===myId?' me':'');d.innerHTML='<strong>'+safe(p.name)+'</strong>';list.appendChild(d)})}
-function shareUrl(){return location.origin+location.pathname+"?room="+encodeURIComponent(roomCode)}
-function renderLobby(){$('roomCode').textContent=roomCode;$('shareLink').textContent=shareUrl();const list=$('lobbyPlayers');list.innerHTML='';(state?.players||[]).forEach(p=>{const d=document.createElement('div');d.className='player'+(p.id===myId?' me':'');d.textContent=p.name+(p.id===myId?' (moi)':'');list.appendChild(d)});if(host){show('hostControls');$('startHint').textContent=state.players.length===1?'Tu peux lancer un test seul, ou attendre les autres participants.':'Tout le monde est prêt ? Tu peux lancer la partie.'}else hide('hostControls')}
-function renderGame(){hide('lobby');show('game');$('turn').textContent=state.players[state.current]?.name||'';$('moves').textContent=state.moves;$('pairs').textContent=state.found+' / 20';renderPlayers();$('message').textContent=state.message||'';const board=$('board');board.innerHTML='';state.deck.forEach((c,i)=>{const b=document.createElement('button');b.className='card '+((c.open||c.done)?'open ':'')+(c.done?'done':'');b.innerHTML=(c.open||c.done)?ART[c.s]:'<span class="back" aria-hidden="true"></span>';b.disabled=c.done||state.phase!=='playing'||state.current!==state.players.findIndex(p=>p.id===myId)||c.open;b.setAttribute('aria-label',(c.open||c.done)?'Carte révélée':'Carte cachée');b.onclick=()=>choose(i);board.appendChild(b)});if(state.phase==='finished'){show('finish');}else hide('finish')}
+function renderPlayers(target){const list=target||$('players');list.innerHTML='';currentPlayers().forEach((p,i)=>{const d=document.createElement('div');d.className='player '+(i===state.current?'current':'')+(p.id===myId?' me':'');d.innerHTML='<strong>'+safe(p.name)+'</strong><br><span class="muted">'+p.score+' paire'+(p.score!==1?'s':'')+'</span>';list.appendChild(d)})}
+function renderLobby(){
+ $('roomCode').textContent=roomCode;
+ $('shareLink').textContent=location.origin+location.pathname+'?room='+encodeURIComponent(roomCode);
+ const list=$('lobbyPlayers');list.innerHTML='';
+ (state?.players||[]).forEach(p=>{const d=document.createElement('div');d.className='player'+(p.id===myId?' me':'');d.textContent=p.name+(p.id===myId?' (moi)':'');list.appendChild(d)});
+ if(host)show('hostControls');else hide('hostControls');
+}
+function renderGame(){
+ hide('lobby');show('game');
+ $('turn').textContent=state.players[state.current]?.name||'';
+ $('moves').textContent=state.moves;$('pairs').textContent=state.found+' / 20';
+ renderPlayers();$('message').textContent=state.message||'';
+ const board=$('board');board.innerHTML='';
+ state.deck.forEach((c,i)=>{const b=document.createElement('button');b.className='card '+((c.open||c.done)?'open ':'')+(c.done?'done':'');b.textContent=(c.open||c.done)?c.s:'?';b.disabled=c.done||state.phase!=='playing'||state.current!==state.players.findIndex(p=>p.id===myId)||c.open;b.setAttribute('aria-label',(c.open||c.done)?'Carte révélée':'Carte cachée');b.onclick=()=>choose(i);board.appendChild(b)});
+ if(state.phase==='finished')show('finish');else hide('finish');
+}
 function apply(s){state=s;if(state.phase==='lobby')renderLobby();else renderGame()}
-function hostInit(){if(peer){try{peer.destroy()}catch(e){}} roomCode=code();host=true;myName=$('nameInput').value.trim()||'Joueur';myId='host';state={phase:'lobby',players:[{id:myId,name:myName,score:0}],current:0,moves:0,found:0,deck:[],message:''};peer=new Peer('memory-'+roomCode);peer.on('open',()=>{setStatus('Partie ouverte. Tu peux maintenant partager le lien.');show('lobby');renderLobby()});peer.on('connection',c=>{c.on('open',()=>{if(state.players.length>=10){c.send({type:'full',state});c.close();return}const proposed=(c.metadata&&c.metadata.name)||'Participant';const id=c.peer;state.players.push({id,name:proposed.slice(0,24),score:0});conns.push(c);c.send({type:'state',state});broadcast({type:'state',state});renderLobby();c.on('data',m=>handleHostMessage(c,m));c.on('close',()=>{state.players=state.players.filter(p=>p.id!==id);conns=conns.filter(x=>x!==c);if(state.players.length===0){state.phase='lobby'}broadcast({type:'state',state});renderLobby()})})});peer.on('error',e=>setStatus('Erreur de connexion : '+e.message))}
-function joinRoom(){roomCode=$('roomInput').value.trim().toUpperCase();myName=$('nameInput').value.trim()||'Joueur';if(!roomCode){setStatus('Entre un code de partie.');return}peer=new Peer();peer.on('open',()=>{const c=peer.connect('memory-'+roomCode,{metadata:{name:myName}});hostConn=c;c.on('open',()=>{myId=peer.id;setStatus('Connecté à la partie.');show('lobby')});c.on('data',m=>{if(m.type==='state'||m.type==='full'){state=m.state;apply(state)}});c.on('close',()=>setStatus('La connexion avec le joueur qui a ouvert la séance a été interrompue.'))});peer.on('error',()=>setStatus('Impossible de rejoindre cette partie. Vérifie le code ou demande à une personne d’ouvrir la séance.'))}
-function handleHostMessage(c,m){if(!m||m.type!=='action'||state.phase!=='playing')return;const idx=state.players.findIndex(p=>p.id===c.peer);if(idx<0||idx!==state.current)return;const i=m.index;if(!Number.isInteger(i)||i<0||i>=state.deck.length)return;const card=state.deck[i];if(card.open||card.done)return;card.open=true;if(state.first==null){state.first=i;state.message=state.players[idx].name+' : choisis une deuxième carte.';broadcast({type:'state',state});renderGame();return}const j=state.first;const card2=state.deck[j];state.first=null;state.moves++;if(card.s===card2.s){card.done=card2.done=true;state.found++;state.message=state.players[idx].name+' a trouvé une paire ! Encore à toi.';if(state.found===20){state.phase='finished';state.message='La partie est terminée !';}broadcast({type:'state',state});renderGame()}else{state.message='Ce ne sont pas les mêmes cartes. Prenez le temps de les regarder…';broadcast({type:'state',state});renderGame();setTimeout(()=>{if(state.phase!=='playing')return;card.open=card2.open=false;state.current=(state.current+1)%state.players.length;state.message='À '+state.players[state.current].name+' !';broadcast({type:'state',state});renderGame()},3000)}}
-function choose(i){if(host)handleHostMessage({peer:myId},{type:'action',index:i});else if(hostConn?.open)hostConn.send({type:'action',index:i})}
-function startNewGame(){if(!host)return;state.phase='playing';state.deck=makeDeck();state.current=0;state.moves=0;state.found=0;state.first=null;state.message='À '+state.players[state.current].name+' !';broadcast({type:'state',state});renderGame()}
-$('hostBtn').onclick=hostInit;$('joinBtn').onclick=joinRoom;$('copyBtn').onclick=async()=>{try{await navigator.clipboard.writeText($('shareLink').textContent);setStatus('Lien copié.')}catch(e){setStatus('Le lien est affiché juste au-dessus : tu peux le sélectionner et le copier.')}};$('startBtn').onclick=()=>{if(!host)return;startNewGame()};$('resetBtn').onclick=()=>{if(host){state.phase='lobby';state.deck=[];state.first=null;state.found=0;state.moves=0;state.message='';broadcast({type:'state',state});renderLobby()}};$('againBtn').onclick=()=>{if(host)startNewGame()};
-const params=new URLSearchParams(location.search);if(params.get('room')){$('roomInput').value=params.get('room');setStatus('Cette séance est accessible avec ce lien. Entre ton prénom puis clique sur Rejoindre. Si personne n’a encore ouvert la séance, demande à une personne de cliquer sur « Ouvrir une partie ».')}
+function hostInit(){
+ roomCode=code();host=true;myName=$('nameInput').value.trim()||'Animatrice';myId='host';
+ state={phase:'lobby',players:[{id:myId,name:myName,score:0}],current:0,moves:0,found:0,deck:[],message:''};
+ peer=new Peer('memory-'+roomCode);
+ peer.on('open',()=>{setStatus('Partie créée. Envoie le lien aux participants.');show('lobby');renderLobby()});
+ peer.on('connection',c=>{c.on('open',()=>{if(state.players.length>=10){c.send({type:'full',state});c.close();return}const proposed=(c.metadata&&c.metadata.name)||'Participant';const id=c.peer;state.players.push({id,name:proposed.slice(0,24),score:0});conns.push(c);c.send({type:'state',state});broadcast({type:'state',state});renderLobby();c.on('data',m=>handleHostMessage(c,m));c.on('close',()=>{state.players=state.players.filter(p=>p.id!==id);conns=conns.filter(x=>x!==c);broadcast({type:'state',state});renderLobby()})})});
+ peer.on('error',e=>setStatus('Erreur de connexion : '+e.message));
+}
+function joinRoom(){
+ roomCode=$('roomInput').value.trim().toUpperCase();myName=$('nameInput').value.trim()||'Participant';
+ if(!roomCode){setStatus('Entre un code de partie.');return}
+ peer=new Peer();
+ peer.on('open',()=>{const c=peer.connect('memory-'+roomCode,{metadata:{name:myName}});hostConn=c;c.on('open',()=>{myId=peer.id;setStatus('Connecté à la partie.');show('lobby')});c.on('data',m=>{if(m.type==='state'||m.type==='full'){state=m.state;apply(state)}});c.on('close',()=>setStatus('La connexion avec l'animatrice a été interrompue.'))});
+ peer.on('error',e=>setStatus('Impossible de rejoindre cette partie. Vérifie le code.'));
+}
+function handleHostMessage(c,m){
+ if(!m||m.type!=='action'||state.phase!=='playing')return;
+ const idx=state.players.findIndex(p=>p.id===c.peer);if(idx<0||idx!==state.current)return;
+ const i=m.index;if(!Number.isInteger(i)||i<0||i>=state.deck.length)return;
+ const card=state.deck[i];if(card.open||card.done)return;
+ card.open=true;
+ if(state.first==null){state.first=i;state.message=state.players[idx].name+' : choisis une deuxième carte.';broadcast({type:'state',state});renderGame();return}
+ const j=state.first;const card2=state.deck[j];state.first=null;state.moves++;
+ if(card.s===card2.s){
+   card.done=card2.done=true;state.found++;state.players[idx].score++;
+   state.message='🎉 '+state.players[idx].name+' trouve une paire et rejoue !';
+   if(state.found===20){state.phase='finished';state.message='🎉 Partie terminée ! Bravo à tous !'}
+   broadcast({type:'state',state});renderGame();
+ }else{
+   state.message='Les deux cartes sont visibles pendant 3 secondes…';broadcast({type:'state',state});renderGame();
+   setTimeout(()=>{if(state.phase!=='playing')return;card.open=card2.open=false;state.current=(state.current+1)%state.players.length;state.message='À '+state.players[state.current].name+' !';broadcast({type:'state',state});renderGame()},3000)
+ }
+}
+function choose(i){if(host){handleHostMessage({peer:myId},{type:'action',index:i})}else if(hostConn?.open)hostConn.send({type:'action',index:i})}
+$('hostBtn').onclick=hostInit;$('joinBtn').onclick=joinRoom;
+$('copyBtn').onclick=async()=>{try{await navigator.clipboard.writeText($('shareLink').textContent);setStatus('Lien copié.')}catch(e){setStatus('Sélectionne et copie le lien affiché.')}};
+$('startBtn').onclick=()=>{if(!host||state.players.length<2)return;state.phase='playing';state.deck=makeDeck();state.current=0;state.moves=0;state.found=0;state.first=null;state.players.forEach(p=>p.score=0);state.message='À '+state.players[0].name+' !';broadcast({type:'state',state});renderGame()};
+function newRound(){if(!host)return;state.phase='playing';state.deck=makeDeck();state.current=0;state.moves=0;state.found=0;state.first=null;state.players.forEach(p=>p.score=0);state.message='Nouvelle partie ! À '+state.players[0].name+' !';broadcast({type:'state',state});renderGame()}
+$('againBtn').onclick=newRound;
+$('resetBtn').onclick=()=>{if(host){state.phase='lobby';state.deck=[];state.players.forEach(p=>p.score=0);broadcast({type:'state',state});renderLobby()}};
+const params=new URLSearchParams(location.search);if(params.get('room')){$('roomInput').value=params.get('room');setStatus('Le code de la partie a été prérempli. Entre ton prénom puis clique sur Rejoindre.')}
 })();
 </script>
 </body>
